@@ -10,9 +10,10 @@ public partial class Form1 : Form
     const string GATEWAY_URL = "http://127.0.0.1:18789";
     const string BRIDGE_URL = "http://127.0.0.1:3847";
     const string NGROK_API = "http://127.0.0.1:4040/api/tunnels";
-    const string BRIDGE_SCRIPT = @"C:\OpenClawWorkspace\scripts\openclaw-bridge-server.js";
-    const string BRIDGE_TOKEN = "{{BRIDGE_TOKEN}}";
-    const string NGROK_EXE = @"{{NGROK_EXE_PATH}}";
+    const string OPENCLAW_HOME = @"E:\OpenClawWorkSpace";
+    const string BRIDGE_SCRIPT = @"E:\OpenClawWorkSpace\OpenClaw-AtomicMemory\scripts\openclaw-bridge-server.js";
+    const string BRIDGE_TOKEN = "openclaw-bridge-default-token";
+    const string NGROK_EXE = @"C:\Users\holyl\AppData\Local\Microsoft\WinGet\Packages\Ngrok.Ngrok_Microsoft.Winget.Source_8wekyb3d8bbwe\ngrok.exe";
 
     // --- UI Elements ---
     readonly Label lblTitle = new();
@@ -219,12 +220,20 @@ public partial class Form1 : Form
         btnStartAll.Enabled = false;
         btnStartAll.Text = "Starting...";
 
-        if (!gatewayUp) StartProcess("cmd.exe", "/c openclaw gateway --port 18789");
+        if (!gatewayUp)
+        {
+            RunCmd("openclaw", "gateway install");
+            RunCmd("openclaw", "gateway start");
+        }
         await Task.Delay(3000);
 
         if (!bridgeUp)
         {
-            var env = new Dictionary<string, string> { ["BRIDGE_TOKEN"] = BRIDGE_TOKEN };
+            var env = new Dictionary<string, string>
+            {
+                ["BRIDGE_TOKEN"] = BRIDGE_TOKEN,
+                ["OPENCLAW_HOME"] = OPENCLAW_HOME,
+            };
             StartProcess("node", BRIDGE_SCRIPT, env);
         }
         await Task.Delay(2000);
@@ -244,7 +253,8 @@ public partial class Form1 : Form
 
         KillByName("ngrok");
         KillNodeScript("bridge-server");
-        KillByPort(18789);
+        RunCmd("openclaw", "gateway stop");
+        KillByPort(18789); // fallback if gateway stop didn't work
 
         await Task.Delay(2000);
         await RefreshStatus();
