@@ -14,6 +14,7 @@ public partial class Form1 : Form
     const string BRIDGE_SCRIPT = @"E:\OpenClawWorkSpace\OpenClaw-AtomicMemory\scripts\openclaw-bridge-server.js";
     const string BRIDGE_TOKEN = "openclaw-bridge-default-token";
     const string NGROK_EXE = @"C:\Users\holyl\AppData\Local\Microsoft\WinGet\Packages\Ngrok.Ngrok_Microsoft.Winget.Source_8wekyb3d8bbwe\ngrok.exe";
+    const string GATEWAY_TOKEN = "5036a91800f518d3c06541e3918c5ae59b42e5d9511b7346b48db0e7b435b609";
 
     // --- UI Elements ---
     readonly Label lblTitle = new();
@@ -27,6 +28,7 @@ public partial class Form1 : Form
     readonly Button btnStartAll = new();
     readonly Button btnStopAll = new();
     readonly Button btnRefresh = new();
+    readonly Button btnDashboard = new();
     readonly Label lblLastCheck = new();
     readonly System.Windows.Forms.Timer timer = new();
     readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(3) };
@@ -83,36 +85,47 @@ public partial class Form1 : Form
         Controls.Add(lblNgrokUrl);
         y += 30;
 
-        // Buttons
-        btnStartAll.Text = "▶  Start All";
+        // Buttons (4 buttons, 100px each)
+        btnStartAll.Text = "▶ Start All";
         btnStartAll.FlatStyle = FlatStyle.Flat;
         btnStartAll.FlatAppearance.BorderColor = Color.FromArgb(60, 180, 100);
         btnStartAll.ForeColor = Color.FromArgb(60, 220, 120);
         btnStartAll.BackColor = Color.FromArgb(30, 50, 40);
-        btnStartAll.Size = new Size(130, 40);
-        btnStartAll.Location = new Point(20, y);
+        btnStartAll.Size = new Size(100, 40);
+        btnStartAll.Location = new Point(14, y);
         btnStartAll.Cursor = Cursors.Hand;
         btnStartAll.Click += async (_, _) => await StartAll();
         Controls.Add(btnStartAll);
 
-        btnStopAll.Text = "■  Stop All";
+        btnStopAll.Text = "■ Stop All";
         btnStopAll.FlatStyle = FlatStyle.Flat;
         btnStopAll.FlatAppearance.BorderColor = Color.FromArgb(200, 80, 80);
         btnStopAll.ForeColor = Color.FromArgb(240, 100, 100);
         btnStopAll.BackColor = Color.FromArgb(50, 30, 30);
-        btnStopAll.Size = new Size(130, 40);
-        btnStopAll.Location = new Point(165, y);
+        btnStopAll.Size = new Size(100, 40);
+        btnStopAll.Location = new Point(124, y);
         btnStopAll.Cursor = Cursors.Hand;
         btnStopAll.Click += async (_, _) => await StopAll();
         Controls.Add(btnStopAll);
 
-        btnRefresh.Text = "↻  Refresh";
+        btnDashboard.Text = "🌐 Dashboard";
+        btnDashboard.FlatStyle = FlatStyle.Flat;
+        btnDashboard.FlatAppearance.BorderColor = Color.FromArgb(180, 160, 60);
+        btnDashboard.ForeColor = Color.FromArgb(230, 210, 100);
+        btnDashboard.BackColor = Color.FromArgb(40, 38, 25);
+        btnDashboard.Size = new Size(120, 40);
+        btnDashboard.Location = new Point(234, y);
+        btnDashboard.Cursor = Cursors.Hand;
+        btnDashboard.Click += (_, _) => OpenDashboard();
+        Controls.Add(btnDashboard);
+
+        btnRefresh.Text = "↻ Refresh";
         btnRefresh.FlatStyle = FlatStyle.Flat;
         btnRefresh.FlatAppearance.BorderColor = Color.FromArgb(100, 140, 200);
         btnRefresh.ForeColor = Color.FromArgb(140, 180, 240);
         btnRefresh.BackColor = Color.FromArgb(30, 35, 50);
-        btnRefresh.Size = new Size(130, 40);
-        btnRefresh.Location = new Point(310, y);
+        btnRefresh.Size = new Size(100, 40);
+        btnRefresh.Location = new Point(364, y);
         btnRefresh.Cursor = Cursors.Hand;
         btnRefresh.Click += async (_, _) => await RefreshStatus();
         Controls.Add(btnRefresh);
@@ -263,6 +276,19 @@ public partial class Form1 : Form
         await RefreshStatus();
         btnStopAll.Enabled = true;
         btnStopAll.Text = "■  Stop All";
+    }
+
+    static void OpenDashboard()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = $"{GATEWAY_URL}/#token={GATEWAY_TOKEN}",
+                UseShellExecute = true,
+            });
+        }
+        catch { }
     }
 
     static void StartProcess(string exe, string args, Dictionary<string, string>? env = null)
