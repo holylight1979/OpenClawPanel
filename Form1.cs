@@ -222,8 +222,11 @@ public partial class Form1 : Form
 
         if (!gatewayUp)
         {
-            RunCmd("openclaw", "gateway install");
-            RunCmd("openclaw", "gateway start");
+            var gwEnv = new Dictionary<string, string>
+            {
+                ["OPENCLAW_HOME"] = OPENCLAW_HOME,
+            };
+            StartProcess("cmd.exe", "/c openclaw gateway --port 18789", gwEnv);
         }
         await Task.Delay(3000);
 
@@ -253,7 +256,7 @@ public partial class Form1 : Form
 
         KillByName("ngrok");
         KillNodeScript("bridge-server");
-        RunCmd("openclaw", "gateway stop");
+        RunCmd("cmd.exe", "/c openclaw gateway stop");
         KillByPort(18789); // fallback if gateway stop didn't work
 
         await Task.Delay(2000);
