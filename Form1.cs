@@ -23,6 +23,7 @@ public partial class Form1 : Form
     [
         (18789, "Gateway"),
         (18791, "Gateway BrowserCtl"),
+        (18792, "Gateway Internal"),
         (3847, "Bridge"),
         (4040, "ngrok API"),
     ];
