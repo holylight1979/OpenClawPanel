@@ -11,6 +11,7 @@ public partial class Form1 : Form
     const string BRIDGE_URL = "http://127.0.0.1:3847";
     const string NGROK_API = "http://127.0.0.1:4040/api/tunnels";
     const string OPENCLAW_HOME = @"E:\OpenClawWorkSpace";
+    const string OPENCLAW_CONFIG = @"E:\OpenClawWorkSpace\.openclaw\openclaw.json";
     const string BRIDGE_SCRIPT = @"E:\OpenClawWorkSpace\OpenClaw-AtomicMemory\scripts\openclaw-bridge-server.js";
     const string BRIDGE_TOKEN = "openclaw-bridge-default-token";
     const string NGROK_EXE = @"C:\Users\holyl\AppData\Local\Microsoft\WinGet\Packages\Ngrok.Ngrok_Microsoft.Winget.Source_8wekyb3d8bbwe\ngrok.exe";
@@ -238,6 +239,7 @@ public partial class Form1 : Form
             var gwEnv = new Dictionary<string, string>
             {
                 ["OPENCLAW_HOME"] = OPENCLAW_HOME,
+                ["OPENCLAW_CONFIG_PATH"] = OPENCLAW_CONFIG,
             };
             StartProcess("cmd.exe", "/c openclaw gateway --port 18789", gwEnv);
         }
