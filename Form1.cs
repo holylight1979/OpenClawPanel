@@ -49,7 +49,7 @@ public partial class Form1 : Form
 
     // Global controls
     readonly Button btnStartAll = new(), btnStopAll = new();
-    readonly Button btnDashboard = new(), btnRefresh = new();
+    readonly Button btnDashboard = new(), btnWebView = new(), btnRefresh = new();
 
     // Ports section
     readonly Label lblPortsHeader = new();
@@ -130,19 +130,23 @@ public partial class Form1 : Form
         y += 28;
 
         // --- Global Buttons ---
-        MakeButton(btnStartAll, "\u25b6 Start All", 14, y, 100, 36,
+        MakeButton(btnStartAll, "\u25b6 Start All", 10, y, 88, 36,
             Color.FromArgb(60, 220, 120), Color.FromArgb(30, 50, 40), Color.FromArgb(60, 180, 100));
         btnStartAll.Click += async (_, _) => await StartAll();
 
-        MakeButton(btnStopAll, "\u25a0 Stop All", 120, y, 100, 36,
+        MakeButton(btnStopAll, "\u25a0 Stop All", 102, y, 88, 36,
             Color.FromArgb(240, 100, 100), Color.FromArgb(50, 30, 30), Color.FromArgb(200, 80, 80));
         btnStopAll.Click += async (_, _) => await StopAll();
 
-        MakeButton(btnDashboard, "\ud83c\udf10 Dashboard", 226, y, 120, 36,
+        MakeButton(btnDashboard, "\ud83c\udf10 Dashboard", 194, y, 105, 36,
             Color.FromArgb(230, 210, 100), Color.FromArgb(40, 38, 25), Color.FromArgb(180, 160, 60));
         btnDashboard.Click += (_, _) => OpenDashboard();
 
-        MakeButton(btnRefresh, "\u21bb Refresh", 352, y, 100, 36,
+        MakeButton(btnWebView, "\ud83d\udd17 Local", 303, y, 95, 36,
+            Color.FromArgb(160, 220, 255), Color.FromArgb(25, 35, 48), Color.FromArgb(80, 140, 190));
+        btnWebView.Click += (_, _) => OpenWebView();
+
+        MakeButton(btnRefresh, "\u21bb Refresh", 402, y, 88, 36,
             Color.FromArgb(140, 180, 240), Color.FromArgb(30, 35, 50), Color.FromArgb(100, 140, 200));
         btnRefresh.Click += async (_, _) => await RefreshStatus();
         y += 50;
@@ -595,6 +599,22 @@ public partial class Form1 : Form
             Process.Start(new ProcessStartInfo
             {
                 FileName = $"{GATEWAY_URL}/#token={GATEWAY_TOKEN}",
+                UseShellExecute = true,
+            });
+        }
+        catch { }
+    }
+
+    void OpenWebView()
+    {
+        // Detect current Gateway port dynamically from scan results
+        var gw = activePorts.FirstOrDefault(p => p.Service == "Gateway");
+        var port = gw?.Port ?? 18789;
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = $"http://127.0.0.1:{port}/#token={GATEWAY_TOKEN}",
                 UseShellExecute = true,
             });
         }
