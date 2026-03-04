@@ -469,15 +469,81 @@ public partial class Form1 : Form
     async Task StartGateway()
     {
         btnGwStart.Enabled = false;
+        await TryStartGateway();
+        await RefreshStatus();
+        btnGwStart.Enabled = true;
+    }
+
+    /// <summary>
+    /// Starts Gateway with stderr capture. Shows error dialog on failure.
+    /// Returns true if health check passes.
+    /// </summary>
+    async Task<bool> TryStartGateway()
+    {
         var env = new Dictionary<string, string>
         {
             ["OPENCLAW_HOME"] = OPENCLAW_HOME,
             ["OPENCLAW_CONFIG_PATH"] = OPENCLAW_CONFIG,
         };
-        StartProcess("cmd.exe", "/c openclaw gateway --port 18789", env);
-        await Task.Delay(3000);
-        await RefreshStatus();
-        btnGwStart.Enabled = true;
+        var psi = new ProcessStartInfo
+        {
+            FileName = "cmd.exe",
+            Arguments = "/c openclaw gateway --port 18789",
+            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = true,
+            UseShellExecute = false,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true,
+        };
+        foreach (var kv in env)
+            psi.EnvironmentVariables[kv.Key] = kv.Value;
+
+        var stderr = new System.Text.StringBuilder();
+        Process? proc = null;
+        try
+        {
+            proc = Process.Start(psi);
+            if (proc != null)
+            {
+                proc.ErrorDataReceived += (_, e) => { if (e.Data != null) stderr.AppendLine(e.Data); };
+                proc.OutputDataReceived += (_, _) => { };
+                proc.BeginErrorReadLine();
+                proc.BeginOutputReadLine();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to launch Gateway process.\n{ex.Message}",
+                "Gateway Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return false;
+        }
+
+        if (proc == null)
+        {
+            MessageBox.Show("Failed to launch Gateway process.",
+                "Gateway Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return false;
+        }
+
+        // Poll health for up to 15 seconds (cold start takes ~11s)
+        for (int i = 0; i < 15; i++)
+        {
+            await Task.Delay(1000);
+            if (await CheckUrl(GATEWAY_URL + "/health"))
+            {
+                try { proc.CancelErrorRead(); proc.CancelOutputRead(); } catch { }
+                return true;
+            }
+            if (proc.HasExited) break;
+        }
+
+        var errText = stderr.ToString().Trim();
+        MessageBox.Show(
+            string.IsNullOrEmpty(errText)
+                ? "Gateway failed to start — health check timed out after 15s."
+                : errText,
+            "Gateway Start Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return false;
     }
 
     async Task StopGateway()
@@ -541,13 +607,7 @@ public partial class Form1 : Form
 
         if (!gatewayUp)
         {
-            var env = new Dictionary<string, string>
-            {
-                ["OPENCLAW_HOME"] = OPENCLAW_HOME,
-                ["OPENCLAW_CONFIG_PATH"] = OPENCLAW_CONFIG,
-            };
-            StartProcess("cmd.exe", "/c openclaw gateway --port 18789", env);
-            await Task.Delay(3000);
+            await TryStartGateway();
         }
 
         if (!bridgeUp)
