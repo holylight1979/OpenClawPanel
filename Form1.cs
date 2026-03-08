@@ -24,11 +24,12 @@ public partial class Form1 : Form
         return candidates[0];
     }
 
-    static Dictionary<string, string> LoadEnv()
+    static Dictionary<string, string> LoadEnv() => LoadEnvFile(FindEnvFile());
+
+    static Dictionary<string, string> LoadEnvFile(string path)
     {
         var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var path = FindEnvFile();
-        if (!File.Exists(path)) return dict;
+        if (string.IsNullOrEmpty(path) || !File.Exists(path)) return dict;
         foreach (var line in File.ReadAllLines(path))
         {
             var trimmed = line.Trim();
@@ -43,12 +44,13 @@ public partial class Form1 : Form
     static string Env(string key, string fallback = "") =>
         envVars.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v) ? v : fallback;
 
-    // --- Resolved Config ---
-    static readonly string OPENCLAW_HOME = Env("OPENCLAW_HOME", @"E:\OpenClaw");
-    static readonly string OPENCLAW_CONFIG = Env("OPENCLAW_CONFIG", @"E:\.openclaw\openclaw.json");
-    static readonly string OPENCLAW_CLI = Env("OPENCLAW_CLI", @"E:\OpenClaw\openclaw.mjs");
+    // --- Resolved Config (all values from .env, no hardcoded paths) ---
+    static readonly string OPENCLAW_HOME = Env("OPENCLAW_HOME");
+    static readonly string OPENCLAW_CONFIG = Env("OPENCLAW_CONFIG");
+    static readonly string OPENCLAW_CLI = Env("OPENCLAW_CLI");
+    static readonly string OPENCLAW_DOTENV = Env("OPENCLAW_DOTENV");
     static readonly string NGROK_EXE = Env("NGROK_EXE", "ngrok");
-    static readonly string NGROK_POLICY = Env("NGROK_POLICY", @"E:\.openclaw\ngrok-policy.yml");
+    static readonly string NGROK_POLICY = Env("NGROK_POLICY");
     static readonly int GATEWAY_PORT = int.TryParse(Env("GATEWAY_PORT", "18789"), out var p) ? p : 18789;
     static readonly string GATEWAY_URL = Env("GATEWAY_URL", $"http://127.0.0.1:{GATEWAY_PORT}");
     static readonly string NGROK_API = Env("NGROK_API", "http://127.0.0.1:4040/api/tunnels");

@@ -16,11 +16,6 @@ partial class Form1
 
     async Task<bool> TryStartGateway()
     {
-        var env = new Dictionary<string, string>
-        {
-            ["OPENCLAW_HOME"] = OPENCLAW_HOME,
-            ["OPENCLAW_CONFIG_PATH"] = OPENCLAW_CONFIG,
-        };
         var psi = new ProcessStartInfo
         {
             FileName = "node",
@@ -31,8 +26,15 @@ partial class Form1
             RedirectStandardError = true,
             RedirectStandardOutput = true,
         };
-        foreach (var kv in env)
+
+        // Load OpenClaw .env (e.g. DISCORD_BOT_TOKEN) and merge with panel env
+        var openClawEnv = LoadEnvFile(OPENCLAW_DOTENV);
+        foreach (var kv in openClawEnv)
             psi.EnvironmentVariables[kv.Key] = kv.Value;
+        foreach (var kv in envVars)
+            psi.EnvironmentVariables[kv.Key] = kv.Value;
+        psi.EnvironmentVariables["OPENCLAW_HOME"] = OPENCLAW_HOME;
+        psi.EnvironmentVariables["OPENCLAW_CONFIG_PATH"] = OPENCLAW_CONFIG;
 
         var stderr = new System.Text.StringBuilder();
         Process? proc = null;
@@ -154,7 +156,7 @@ partial class Form1
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = $"http://127.0.0.1:{port}/ui#token={GATEWAY_TOKEN}",
+                FileName = $"http://127.0.0.1:{port}/#token={GATEWAY_TOKEN}",
                 UseShellExecute = true,
             });
         }
