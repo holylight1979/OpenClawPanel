@@ -46,6 +46,7 @@ public partial class Form1 : Form
     // --- Resolved Config ---
     static readonly string OPENCLAW_HOME = Env("OPENCLAW_HOME", @"E:\OpenClaw");
     static readonly string OPENCLAW_CONFIG = Env("OPENCLAW_CONFIG", @"E:\.openclaw\openclaw.json");
+    static readonly string OPENCLAW_CLI = Env("OPENCLAW_CLI", @"E:\OpenClaw\openclaw.mjs");
     static readonly string NGROK_EXE = Env("NGROK_EXE", "ngrok");
     static readonly string NGROK_POLICY = Env("NGROK_POLICY", @"E:\.openclaw\ngrok-policy.yml");
     static readonly int GATEWAY_PORT = int.TryParse(Env("GATEWAY_PORT", "18789"), out var p) ? p : 18789;

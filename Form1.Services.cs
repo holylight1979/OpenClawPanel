@@ -23,8 +23,8 @@ partial class Form1
         };
         var psi = new ProcessStartInfo
         {
-            FileName = "cmd.exe",
-            Arguments = $"/c openclaw gateway --port {GATEWAY_PORT}",
+            FileName = "node",
+            Arguments = $"\"{OPENCLAW_CLI}\" gateway --port {GATEWAY_PORT}",
             WindowStyle = ProcessWindowStyle.Hidden,
             CreateNoWindow = true,
             UseShellExecute = false,
@@ -85,7 +85,7 @@ partial class Form1
     async Task StopGateway()
     {
         btnGwStop.Enabled = false;
-        RunCmd("cmd.exe", "/c openclaw gateway stop");
+        RunCmd("node", $"\"{OPENCLAW_CLI}\" gateway stop");
         KillByPort(GATEWAY_PORT);
         await Task.Delay(2000);
         await RefreshStatus();
@@ -137,7 +137,7 @@ partial class Form1
         btnStopAll.Text = "Stopping...";
 
         KillByName("ngrok");
-        RunCmd("cmd.exe", "/c openclaw gateway stop");
+        RunCmd("node", $"\"{OPENCLAW_CLI}\" gateway stop");
         KillByPort(GATEWAY_PORT);
 
         await Task.Delay(2000);
